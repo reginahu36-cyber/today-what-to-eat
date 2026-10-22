@@ -109,7 +109,7 @@ function menuDisplay(s){
  const itemsBlock=items.length?`<details class="card" style="margin-top:14px"><summary style="font-weight:800;cursor:pointer;padding:4px">餐點名稱與價格清單（${items.length} 項）</summary><div class="menu-display-grid">${items.map((x,i)=>`<div class="menu-display-item"><div class="menu-display-icon">${esc(x.icon||iconFor(x.name,i))}</div><div class="menu-display-name">${esc(x.name)}</div><div class="menu-display-price">NT$${esc(x.price||0)}</div></div>`).join("")}</div></details>`:"";
  return `<div class="row" style="align-items:center;justify-content:space-between"><div><h1>📖 ${esc(s.name||s.brandName||"菜單")}</h1><div class="muted">菜單瀏覽模式</div></div><button class="secondary smallbtn fit" data-menu-edit="${s.id}">✏️ 編輯菜單</button></div><div class="card"><div><b>${esc(s.name||s.brandName||"店家")}</b><div class="muted">${menus.length} 張菜單圖片 · ${items.length} 個餐點選項</div></div>${photos}${itemsBlock}<div style="margin-top:14px"><button type="button" class="ghost" id="menuBackToShop">← 返回店家列表</button></div></div>`;
 }
-function menuForm(s){return `<h1>🧾 管理菜單</h1><div class="card"><b>${esc(s.name)}</b><div class="muted">${esc(regionLabel(s))}</div><div class="field"><label>這份菜單適用範圍</label><select id="menuScope"><option value="branch" ${(s.menuScope||"branch")==="branch"?"selected":""}>僅此店家</option><option value="region" ${s.menuScope==="region"?"selected":""}>同一地區版本</option><option value="brand" ${s.menuScope==="brand"?"selected":""}>其他店家共用</option></select><div class="muted">目前先記錄適用範圍；各店的菜單與價格仍分開保存，避免不同分店價格互相覆蓋。</div></div><div class="field"><label>菜單版本名稱（選填）</label><input id="menuVersionName" placeholder="例如：台北店 2026 秋季菜單"></div><div class="field"><label>上傳菜單圖片（可多張、可重複上傳）</label><input type="file" id="menuUpload" accept="image/*" multiple></div><div class="muted">上傳後可保留原圖，並建立裁切副本。每次新上傳都會新增版本，不會覆蓋舊菜單。</div><div>${(s.menus||[]).map((m,i)=>`<div class="card"><div class="muted">${esc(m.versionName||("菜單版本 "+(i+1)))} · ${esc(m.date)} · ${({branch:"此店家",region:"地區版本",brand:"共用版本"}[m.scope||"branch"])}</div><img class="menuimg" src="${m.src}" alt="菜單圖片"><div class="row"><button class="secondary smallbtn" data-cropmenu="${s.id}|${i}">✂️ 裁切圖片</button><button class="danger smallbtn" data-delmenu="${s.id}|${i}">刪除這張</button></div><div id="cropper-${i}"></div></div>`).join("")}</div><h3>餐點選項與目前價格</h3><p class="muted">圖片文字目前不會自動辨識，請確認後手動輸入。消費紀錄會保存當次實際金額。</p><div class="field"><label>餐點／飲料名稱</label><input id="itemName" placeholder="例如：珍珠奶茶"></div><div class="field"><label>目前菜單價格（元）</label><input id="itemPrice" type="number" min="0" placeholder="例如：65"></div><button id="addMenuItem">新增餐點選項</button><div style="margin-top:12px">${(s.menuItems||[]).map((x,i)=>`<div class="row card"><span>${esc(x.name)} · NT$${esc(x.price)}</span><button class="danger smallbtn fit" data-delitem="${s.id}|${i}">移除</button></div>`).join("")}</div><button type="button" class="ghost" id="menuUpdate">完成並查看大圖示</button></div>`}
+function menuForm(s){return `<h1>🧾 管理菜單</h1><div class="card"><b>${esc(s.name)}</b><div class="muted">${esc(regionLabel(s))}</div><div class="field"><label>這份菜單適用範圍</label><select id="menuScope"><option value="branch" ${(s.menuScope||"branch")==="branch"?"selected":""}>僅此店家</option><option value="region" ${s.menuScope==="region"?"selected":""}>同一地區版本</option><option value="brand" ${s.menuScope==="brand"?"selected":""}>其他店家共用</option></select><div class="muted">目前先記錄適用範圍；各店的菜單與價格仍分開保存，避免不同分店價格互相覆蓋。</div></div><div class="field"><label>菜單版本名稱（選填）</label><input id="menuVersionName" placeholder="例如：台北店 2026 秋季菜單"></div><div class="field"><label>上傳菜單圖片（可多張、可重複上傳）</label><input type="file" id="menuUpload" accept="image/*" multiple></div><div class="muted">上傳後可保留原圖，並建立裁切副本。每次新上傳都會新增版本，不會覆蓋舊菜單。</div><div>${(s.menus||[]).map((m,i)=>`<div class="card"><div class="muted">${esc(m.versionName||("菜單版本 "+(i+1)))} · ${esc(m.date)} · ${({branch:"此店家",region:"地區版本",brand:"共用版本"}[m.scope||"branch"])}</div><img class="menuimg" src="${m.src}" alt="菜單圖片"><div class="row"><button class="secondary smallbtn" data-cropmenu="${s.id}|${i}">✂️ 裁切圖片</button><button class="danger smallbtn" data-delmenu="${s.id}|${i}">刪除這張</button></div><div id="cropper-${i}"></div></div>`).join("")}</div><h3>餐點選項與目前價格</h3><p class="muted">圖片文字目前不會自動辨識，請確認後手動輸入。消費紀錄會保存當次實際金額。</p><div class="field"><label>餐點／飲料名稱</label><input id="itemName" placeholder="例如：珍珠奶茶"></div><div class="field"><label>目前菜單價格（元）</label><input id="itemPrice" type="number" min="0" placeholder="例如：65"></div><button id="addMenuItem">新增餐點選項</button><div style="margin-top:12px">${(s.menuItems||[]).map((x,i)=>`<div class="row card"><span>${esc(x.name)} · NT$${esc(x.price)}</span><button class="danger smallbtn fit" data-delitem="${s.id}|${i}">移除</button></div>`).join("")}</div><div class="row" style="margin-top:12px"><button type="button" class="secondary" id="menuEditorBack">← 返回菜單照片</button><button type="button" class="ghost" id="menuUpdate">完成並查看菜單</button></div></div>`}
 function showNavEditor(item){
  const area=$("editCategoryArea"); if(!area){alert("請先開啟個人化設定再編輯。");return;}
  const choices=["🍜","🍱","🍢","🔥","🍲","🥟","🍔","🍕","🍣","🥗","🍰","🍩","☕","🧋","🥤","🍺","🍎","🏠","♡","💗","📖","📍","🧾","⚙️","🛍️","⭐","🎯","🐟","🥩","🍗","🌮","🥐"];
@@ -146,9 +146,9 @@ function bindMenuDisplay(s){
   const close=()=>box.remove();box.addEventListener("click",e=>{if(e.target===box)close()});box.querySelector("#closeMenuZoom").onclick=close;
   const onKey=e=>{if(e.key==="Escape"){close();document.removeEventListener("keydown",onKey)}};document.addEventListener("keydown",onKey);
  });
- const back=$("menuBackToShop");if(back)back.onclick=()=>{page=s.kind==="飲料店"?"drinks":s.kind==="餐廳"?"restaurants":("cat:"+((data.categories||[]).find(c=>c.name===s.kind)?.id||""));render()};
+ const back=$("menuBackToShop");if(back)back.onclick=()=>{const target=s.kind==="飲料店"?"drinks":s.kind==="餐廳"?"restaurants":("cat:"+((data.categories||[]).find(c=>c.name===s.kind)?.id||""));if(typeof page!=="undefined")page=target;if(typeof render==="function")render();else if(typeof listView==="function"){$("view").innerHTML=listView(s.kind);}};
 }
-function bindMenu(s){
+function bindMenu(s){const backEditor=$("menuEditorBack");if(backEditor)backEditor.onclick=()=>{$("view").innerHTML=menuDisplay(s);bindMenuDisplay(s)};
  const updateBtn=$("menuUpdate");
  if(updateBtn) updateBtn.onclick=()=>{
    s.menuScope=$("menuScope")?.value||s.menuScope||"branch";
@@ -206,4 +206,22 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http"))navigato
 })();
 
 </script>
+
+<script>
+/* Menu navigation: open read-only photo browsing first. */
+document.addEventListener("click", function(ev){
+  const btn = ev.target.closest("[data-menu]");
+  if (!btn) return;
+  const id = btn.getAttribute("data-menu");
+  const shop = (typeof data !== "undefined" && data.shops || []).find(x => String(x.id) === String(id));
+  if (!shop || typeof menuDisplay !== "function" || typeof bindMenuDisplay !== "function") return;
+  ev.preventDefault();
+  ev.stopImmediatePropagation();
+  const view = document.getElementById("view");
+  if (!view) return;
+  view.innerHTML = menuDisplay(shop);
+  bindMenuDisplay(shop);
+}, true);
+</script>
+
 </body></html>
