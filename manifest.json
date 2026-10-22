@@ -1,11 +1,10 @@
 {
-  "name": "午餐小日子",
-  "short_name": "午餐小日子",
-  "description": "可愛療癒的午餐收藏與選擇小幫手",
-  "start_url": "./index.html",
+  "name": "今天吃什麼",
+  "short_name": "今天吃什麼",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#fff8f1",
+  "background_color": "#fffaf5",
   "theme_color": "#fff4e8",
-  "lang": "zh-TW",
-  "icons": []
+  "description": "分開管理餐廳與飲料店、營業時間、菜單及吃喝紀錄"
 }
