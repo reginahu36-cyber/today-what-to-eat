@@ -18,9 +18,12 @@
 .menu-lightbox button{align-self:flex-end;margin:0 4px 10px;background:#fff;color:#222}
 .menu-display-grid{margin-top:18px}
 
+
+.home-title-button{border:0;background:transparent;color:inherit;font:inherit;text-align:left;cursor:pointer;padding:0;min-width:0}
+.home-title-button:focus-visible{outline:3px solid var(--accent);outline-offset:5px;border-radius:8px}
 </style></head>
 <body><div class="app">
-<header class="top"><button class="hamb" id="menuBtn" aria-label="開啟側邊選單">☰</button><div class="brand">🍑 今天吃什麼 <div class="sub">我的美食與飲料口袋</div></div><button class="secondary" id="addQuick">＋ 新增</button></header>
+<header class="top"><button class="hamb" id="menuBtn" aria-label="開啟側邊選單">☰</button><button type="button" class="brand home-title-button" id="homeTitleButton" aria-label="返回首頁">🍑 今天吃什麼 <div class="sub">我的美食與飲料口袋</div></button><button class="secondary" id="addQuick">＋ 新增</button></header>
 <main id="view"></main><div class="foot">整合試用版｜資料保存在這台裝置的瀏覽器中。請定期匯出備份；這不是正式網站。</div>
 </div><div id="drawerRoot"></div>
 <script>
@@ -224,4 +227,15 @@ document.addEventListener("click", function(ev){
 }, true);
 </script>
 
+
+<script>
+document.addEventListener("click",function(e){
+ const title=e.target.closest("#homeTitleButton");
+ if(!title)return;
+ e.preventDefault();
+ if(typeof page!=="undefined")page="home";
+ if(typeof render==="function")render();
+ else window.location.href="./";
+});
+</script>
 </body></html>
