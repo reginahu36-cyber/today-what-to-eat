@@ -1,10 +1,9 @@
 {
-  "name": "今天吃什麼",
+  "name": "今天吃什麼｜美食口袋",
   "short_name": "今天吃什麼",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#fffaf5",
+  "background_color": "#fff8f1",
   "theme_color": "#fff4e8",
-  "description": "分開管理餐廳與飲料店、營業時間、菜單及吃喝紀錄"
+  "description": "美食與飲料店管理、手動新增餐點與菜單資料"
 }
