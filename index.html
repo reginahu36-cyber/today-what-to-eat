@@ -64,13 +64,13 @@ footer{text-align:center;font-size:11px;color:#ad9b8e;margin:28px 0}
  <div class="restaurant" style="margin-top:12px"><div class="foodemoji">☁️</div><div class="rmain"><div class="rtitle">免登入模式</div><div class="meta" id="syncStatus">目前不需要帳號，收藏資料會存在這台裝置。若清除瀏覽器資料，收藏可能會一起消失。</div></div></div>
  <div class="notice">目前是免登入模式，收藏資料存在這台裝置的瀏覽器。點「找現在有開的店」會開啟 Google Maps 的即時搜尋，實際營業資訊以店家最新資料為準。</div>
 </section>
-<footer>Made with ♡ for your lunch breaks · 今天吃什麼 v0.2</footer>
+<footer>Made with ♡ for your lunch breaks · 今天吃什麼 v0.3（自訂分類）</footer>
 </div>
 <nav><div class="navinner"><button class="navbtn active" data-page="homePage"><span>🏠</span>口袋名單</button><button class="navbtn" data-page="historyPage"><span>📔</span>吃過紀錄</button><button class="navbtn" data-page="settingsPage"><span>⚙️</span>設定</button></div></nav>
 
 <div class="modalback" id="modalBack"><div class="modal"><h3 id="modalTitle">新增餐廳 🌷</h3><form id="restaurantForm">
  <div class="field"><label>餐廳名稱 *</label><input id="rName" required maxlength="80" placeholder="例如：巷口的咖哩飯"></div>
- <div class="formrow"><div class="field"><label>餐點類型</label><select id="rCategory"><option>飯類</option><option>麵類</option><option>小吃</option><option>清爽</option><option>其他</option></select></div><div class="field"><label>預估價格（NT$）</label><input id="rPrice" type="number" min="0" max="10000" value="120"></div></div>
+ <div class="formrow"><div class="field"><label>餐點類型</label><select id="rCategory"><option>飯類</option><option>麵類</option><option>小吃</option><option>清爽</option><option>其他</option></select></div><div class="field"><label>預估價格（NT$）</label><input id="rPrice" type="number" min="0" max="10000" value="120"></div></div><div class="field"><label>新增自己的分類</label><div style="display:flex;gap:8px"><input id="newCategory" maxlength="24" placeholder="例如：火鍋、日式、甜點"><button type="button" class="btn-soft" id="addCategoryBtn" style="white-space:nowrap">＋ 新增分類</button></div><div class="small">新增後會加入上方「餐點類型」，也會出現在口袋名單分類篩選。</div></div>
  <div class="field"><label>想吃的餐點</label><input id="rDish" maxlength="100" placeholder="例如：雞腿咖哩"></div>
  <div class="field"><label>地點／地址（選填）</label><input id="rAddress" maxlength="200" placeholder="公司附近、路名或地址"></div>
  <div class="field"><label>備註（選填）</label><textarea id="rNote" rows="2" maxlength="300" placeholder="例如：同事推薦、想試試看"></textarea></div>
@@ -80,13 +80,17 @@ footer{text-align:center;font-size:11px;color:#ad9b8e;margin:28px 0}
 <div class="modalback" id="authBack"><div class="modal"><h3>雲端登入 ☁️</h3><p class="small">連接 Firebase 後，可用 Google 帳號登入並同步餐廳收藏。</p><div class="notice" id="authNotice">這個版本刻意先不加入登入功能，讓你可以直接使用。</div><div class="field"><label>電子郵件（設定後可用）</label><input id="email" type="email" placeholder="you@example.com"></div><div class="field"><label>密碼（設定後可用）</label><input id="password" type="password" placeholder="至少 6 個字元"></div><div class="modalactions"><button class="btn-soft" id="closeAuth">關閉</button><button class="btn-primary" id="authAction">登入</button></div></div></div>
 <script>
 const KEY='lunch-little-days-v1';
-let state={restaurants:[],history:[],min:100,max:150};
+let state={restaurants:[],history:[],min:100,max:150,categories:[]};
 try{state={...state,...JSON.parse(localStorage.getItem(KEY)||'{}')}}catch(e){}
 let filter='all',category='all',editing=null,currentPick=null;
 const $=id=>document.getElementById(id);
 const save=()=>{localStorage.setItem(KEY,JSON.stringify(state));render()};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const DEFAULT_CATEGORIES=['飯類','麵類','小吃','清爽','其他'];
+function allCategories(){return [...new Set([...DEFAULT_CATEGORIES,...(state.categories||[]),...state.restaurants.map(r=>r.category).filter(Boolean)])]}
+function renderCategories(){const cats=allCategories();const select=$('rCategory');const previous=select.value;select.innerHTML=cats.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('');if(cats.includes(previous))select.value=previous;const emojis={飯類:'🍚',麵類:'🍜',小吃:'🥟',清爽:'🥗',其他:'🍲'};$('categoryFilters').innerHTML='<button class="chip '+(category==='all'?'active':'')+'" data-category="all">所有口味</button>'+cats.map(c=>`<button class="chip ${category===c?'active':''}" data-category="${esc(c)}">${emojis[c]||'🍱'} ${esc(c)}</button>`).join('')}
 function render(){
+ renderCategories();
  $('totalCount').textContent=state.restaurants.length;
  $('wantCount').textContent=state.restaurants.filter(r=>!r.had).length;
  $('hadCount').textContent=state.restaurants.filter(r=>r.had).length;
@@ -97,9 +101,10 @@ function render(){
  $('historyList').innerHTML=had.length?had.map(h=>`<div class="restaurant"><div class="foodemoji">🍽️</div><div class="rmain"><div class="rtitle">${esc(h.name)}</div><div class="meta">${esc(h.date)} · ${h.price?'NT$'+esc(h.price):'價格未記錄'} ${h.dish?'· '+esc(h.dish):''}</div></div></div>`).join(''):'<div class="empty">📔 還沒有用餐紀錄<br><br>吃完一間店後，按「我吃過了」就會出現在這裡。</div>';
 }
 function card(r){return `<div class="restaurant"><div class="foodemoji">${({飯類:'🍚',麵類:'🍜',小吃:'🥟',清爽:'🥗',其他:'🍲'})[r.category]||'🍱'}</div><div class="rmain"><div class="rtitle">${esc(r.name)} ${r.had?'<span class="tag">吃過了 ♡</span>':''}</div><div class="meta">NT$${esc(r.price||'未填')} ${r.dish?'· '+esc(r.dish):''}<br>${r.address?'📍 '+esc(r.address):''}</div>${r.note?`<div class="meta">${esc(r.note)}</div>`:''}<div class="tags"><span class="tag">${esc(r.category)}</span>${r.price>=state.min&&r.price<=state.max?'<span class="tag">預算剛剛好</span>':''}</div><div class="actions"><button class="mini green" data-action="had" data-id="${r.id}">${r.had?'↩ 改回想吃':'✓ 我吃過了'}</button><button class="mini" data-action="edit" data-id="${r.id}">✏️ 編輯</button><button class="mini pink" data-action="delete" data-id="${r.id}">移除</button>${r.address?`<button class="mini" data-action="map" data-id="${r.id}">🗺️ 地圖</button>`:''}</div></div></div>`}
-function openForm(r=null){editing=r?.id||null;$('modalTitle').textContent=r?'編輯餐廳 ✏️':'新增餐廳 🌷';$('rName').value=r?.name||'';$('rCategory').value=r?.category||'飯類';$('rPrice').value=r?.price??120;$('rDish').value=r?.dish||'';$('rAddress').value=r?.address||'';$('rNote').value=r?.note||'';$('modalBack').classList.add('show')}
+function openForm(r=null){editing=r?.id||null;renderCategories();$('modalTitle').textContent=r?'編輯餐廳 ✏️':'新增餐廳 🌷';$('rName').value=r?.name||'';$('rCategory').value=r?.category||'飯類';$('rPrice').value=r?.price??120;$('rDish').value=r?.dish||'';$('rAddress').value=r?.address||'';$('rNote').value=r?.note||'';$('modalBack').classList.add('show')}
 function closeForm(){$('modalBack').classList.remove('show')}
 $('addBtn').onclick=()=>openForm();$('cancelModal').onclick=closeForm;
+$('addCategoryBtn').onclick=()=>{const name=$('newCategory').value.trim();if(!name){alert('請先輸入分類名稱喔 ♡');return}if(name.length>24){alert('分類名稱最多 24 個字');return}if(allCategories().includes(name)){alert('這個分類已經存在囉 ♡');$('rCategory').value=name;$('newCategory').value='';return}state.categories=[...(state.categories||[]),name];save();$('rCategory').value=name;$('newCategory').value='';alert(`已新增「${name}」分類 ♡`)};
 $('restaurantForm').onsubmit=e=>{e.preventDefault();const item={id:editing||crypto.randomUUID(),name:$('rName').value.trim(),category:$('rCategory').value,price:Number($('rPrice').value)||0,dish:$('rDish').value.trim(),address:$('rAddress').value.trim(),note:$('rNote').value.trim(),had:false};const old=state.restaurants.find(x=>x.id===editing);if(old){item.had=old.had;state.restaurants=state.restaurants.map(x=>x.id===editing?item:x)}else state.restaurants.push(item);save();closeForm()};
 $('restaurantList').onclick=e=>{const b=e.target.closest('button[data-action]');if(!b)return;const r=state.restaurants.find(x=>x.id===b.dataset.id);if(!r)return;switch(b.dataset.action){case'had':if(!r.had)state.history.push({name:r.name,price:r.price,dish:r.dish,date:new Date().toLocaleDateString('zh-TW')});r.had=!r.had;save();break;case'edit':openForm(r);break;case'delete':if(confirm(`確定要移除「${r.name}」嗎？`)){state.restaurants=state.restaurants.filter(x=>x.id!==r.id);save()}break;case'map':window.open('https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(r.address),'_blank','noopener');break}};
 $('filters').onclick=e=>{const b=e.target.closest('[data-filter]');if(!b)return;filter=b.dataset.filter;document.querySelectorAll('#filters .chip').forEach(x=>x.classList.toggle('active',x===b));render()};
